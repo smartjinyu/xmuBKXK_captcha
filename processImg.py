@@ -5,15 +5,14 @@ __author__ = 'smartjinyu'
 from PIL import Image
 import numpy
 
-filePath = "C:\\Users\\smart\\Desktop\\captcha\\0547.jpg"
+filePath = "C:\\Users\\smart\\Desktop\\captcha\\3022.jpg"
 
 
 def main():
     rawImage = Image.open(filePath)
     BlackWhiteImage = rawImage.convert('1')
     imArray = numpy.array(BlackWhiteImage)[:, 4:195]  # discard the start and end columns
-    print(imArray.shape[1])
-    print(imArray[:, 146])
+    print(imArray.shape)
 
     # compute start and end points of two lines in first and last column
     indexFirstColumn = []
@@ -55,15 +54,23 @@ def main():
         k0 = (indexLastColumn[0] - indexFirstColumn[0]) / 190.0
     k1 = (indexLastColumn[1] - indexFirstColumn[1]) / 190.0
 
+    # eliminate interfering lines
+    lowerBound = 2.5
+    upperBound = 3.6
+    # points in [y-lowerBond,y+upperBound] will be set to True (if no digit pixel)
     for x in range(0, 190):
-        y0 = round(k0 * x + indexFirstColumn[0])
-        if 3 <= y0 <= 95 and ((imArray[y0 - 3, x] != 0) and (imArray[y0 + 4, x] != 0)):
-            for j in range(y0 - 3, y0 + 4):
+        y0 = k0 * x + indexFirstColumn[0]
+        lower = max(round(y0 - lowerBound), 0)
+        upper = min(round(y0 + upperBound), 99) # avoid array index out of bound
+        if (imArray[lower, x] != 0) and (imArray[upper, x] != 0):
+            for j in range(lower, upper):
                 imArray[j, x] = True
 
-        y1 = round(k1 * x + indexFirstColumn[1])
-        if 3 <= y1 <= 95 and ((imArray[y1 - 3, x] != 0) and (imArray[y1 + 4, x] != 0)):
-            for j in range(y1 - 3, y1 + 4):
+        y1 = k1 * x + indexFirstColumn[1]
+        lower = max(round(y1 - lowerBound), 0)
+        upper = min(round(y1 + upperBound), 99)
+        if (imArray[lower, x] != 0) and (imArray[upper, x] != 0):
+            for j in range(lower, upper):
                 imArray[j, x] = True
 
     im = Image.fromarray(numpy.uint(imArray * 255))
