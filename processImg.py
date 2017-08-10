@@ -5,7 +5,7 @@ __author__ = 'smartjinyu'
 from PIL import Image
 import numpy
 
-filePath = "C:\\Users\\smart\\Desktop\\captcha\\3022.jpg"
+filePath = ".\\captchas\\3022.jpg"
 
 
 def main():
