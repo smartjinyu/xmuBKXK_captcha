@@ -6,7 +6,7 @@ from PIL import Image
 import numpy
 from tesserocr import PyTessBaseAPI
 
-filePath = "./captchas/9350.jpg"
+filePath = "./captchas/8979.jpg"
 
 
 def main():
@@ -91,11 +91,11 @@ def main():
     imgs[3].show()
 
     with PyTessBaseAPI() as api:
-        api.SetImage(im)
-        api.SetVariable("classify_bln_numeric_mode", "1")
-        api.GetWords()
-        print(api.GetUTF8Text())
-        print(api.AllWordConfidences())
+        for img in imgs:
+            api.SetImage(img)
+            api.SetVariable("tessedit_char_whitelist", "0123456789")
+            api.SetPageSegMode(10)
+            print(api.GetUTF8Text())
 
 
 if __name__ == '__main__':
