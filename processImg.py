@@ -4,8 +4,10 @@
 __author__ = 'smartjinyu'
 from PIL import Image
 import numpy
+import tesserocr
+from tesserocr import PyTessBaseAPI
 
-filePath = ".\\captchas\\3022.jpg"
+filePath = "./captchas/7482.jpg"
 
 
 def main():
@@ -36,6 +38,11 @@ def main():
                 i = i + 4
         i = i + 1
 
+    if len(indexFirstColumn) == 1:
+        indexFirstColumn.append(indexFirstColumn[0]+1)
+    if len(indexLastColumn) == 1:
+        indexLastColumn.append(indexLastColumn[0]+1)
+
     print(indexFirstColumn)
     print(indexLastColumn)
 
@@ -61,7 +68,7 @@ def main():
     for x in range(0, 190):
         y0 = k0 * x + indexFirstColumn[0]
         lower = max(round(y0 - lowerBound), 0)
-        upper = min(round(y0 + upperBound), 99) # avoid array index out of bound
+        upper = min(round(y0 + upperBound), 99)  # avoid array index out of bound
         if (imArray[lower, x] != 0) and (imArray[upper, x] != 0):
             for j in range(lower, upper):
                 imArray[j, x] = True
@@ -73,8 +80,14 @@ def main():
             for j in range(lower, upper):
                 imArray[j, x] = True
 
-    im = Image.fromarray(numpy.uint(imArray * 255))
+    im = Image.fromarray(numpy.uint8(imArray * 255))
     im.show()
+    # result = tesserocr.image_to_text(im)
+    with PyTessBaseAPI() as api:
+        api.SetImage(im)
+        api.SetVariable("classify_bln_numeric_mode", "1")
+        print(api.GetUTF8Text())
+        print(api.AllWordConfidences())
 
 
 if __name__ == '__main__':
