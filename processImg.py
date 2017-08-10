@@ -4,10 +4,9 @@
 __author__ = 'smartjinyu'
 from PIL import Image
 import numpy
-import tesserocr
 from tesserocr import PyTessBaseAPI
 
-filePath = "./captchas/7482.jpg"
+filePath = "./captchas/9350.jpg"
 
 
 def main():
@@ -41,7 +40,7 @@ def main():
     if len(indexFirstColumn) == 1:
         indexFirstColumn.append(indexFirstColumn[0]+1)
     if len(indexLastColumn) == 1:
-        indexLastColumn.append(indexLastColumn[0]+1)
+        indexLastColumn.append(indexLastColumn[0]+2)
 
     print(indexFirstColumn)
     print(indexLastColumn)
@@ -54,7 +53,7 @@ def main():
         if imArray[y, x] == 0:
             count = count + 1
 
-    if count < 15:  # typically if they are in the same line, count >= 18
+    if count < 16:  # typically if they are in the same line, count >= 18
         temp = indexLastColumn[1]
         indexLastColumn[1] = indexLastColumn[0]
         indexLastColumn[0] = temp
@@ -81,11 +80,20 @@ def main():
                 imArray[j, x] = True
 
     im = Image.fromarray(numpy.uint8(imArray * 255))
-    im.show()
     # result = tesserocr.image_to_text(im)
+    imgs = [Image.fromarray(numpy.uint8(imArray[:,0:50] * 255))]
+    imgs.append(Image.fromarray(numpy.uint8(imArray[:,51:96] * 255)))
+    imgs.append(Image.fromarray(numpy.uint8(imArray[:,97:146] * 255)))
+    imgs.append(Image.fromarray(numpy.uint8(imArray[:,147:190] * 255)))
+    imgs[0].show()
+    imgs[1].show()
+    imgs[2].show()
+    imgs[3].show()
+
     with PyTessBaseAPI() as api:
         api.SetImage(im)
         api.SetVariable("classify_bln_numeric_mode", "1")
+        api.GetWords()
         print(api.GetUTF8Text())
         print(api.AllWordConfidences())
 
