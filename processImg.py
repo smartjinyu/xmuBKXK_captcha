@@ -1,17 +1,13 @@
 #!/usr/bin/python
-# -*- coding=utf-8 -*-
 
 __author__ = 'smartjinyu'
 from PIL import Image
 import numpy
-from tesserocr import PyTessBaseAPI
-
-filePath = "./captchas/8979.jpg"
 
 
-def main():
-    rawImage = Image.open(filePath)
-    BlackWhiteImage = rawImage.convert('1')
+
+def processImg(rawImg):
+    BlackWhiteImage = rawImg.convert('1')
     imArray = numpy.array(BlackWhiteImage)[:, 4:195]  # discard the start and end columns
     print(imArray.shape)
 
@@ -85,18 +81,7 @@ def main():
     imgs.append(Image.fromarray(numpy.uint8(imArray[:,51:96] * 255)))
     imgs.append(Image.fromarray(numpy.uint8(imArray[:,97:146] * 255)))
     imgs.append(Image.fromarray(numpy.uint8(imArray[:,147:190] * 255)))
-    imgs[0].show()
-    imgs[1].show()
-    imgs[2].show()
-    imgs[3].show()
-
-    with PyTessBaseAPI() as api:
-        for img in imgs:
-            api.SetImage(img)
-            api.SetVariable("tessedit_char_whitelist", "0123456789")
-            api.SetPageSegMode(10)
-            print(api.GetUTF8Text())
+    return imgs
 
 
-if __name__ == '__main__':
-    main()
+
