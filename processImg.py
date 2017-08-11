@@ -5,11 +5,10 @@ from PIL import Image
 import numpy
 
 
-
 def processImg(rawImg):
     BlackWhiteImage = rawImg.convert('1')
     imArray = numpy.array(BlackWhiteImage)[:, 4:195]  # discard the start and end columns
-    print(imArray.shape)
+    # print(imArray.shape)
 
     # compute start and end points of two lines in first and last column
     indexFirstColumn = []
@@ -33,13 +32,14 @@ def processImg(rawImg):
                 i = i + 4
         i = i + 1
 
+    # avoid two lines intersect at the start or the end
     if len(indexFirstColumn) == 1:
-        indexFirstColumn.append(indexFirstColumn[0]+1)
+        indexFirstColumn.append(indexFirstColumn[0] + 1)
     if len(indexLastColumn) == 1:
-        indexLastColumn.append(indexLastColumn[0]+2)
+        indexLastColumn.append(indexLastColumn[0] + 2)
 
-    print(indexFirstColumn)
-    print(indexLastColumn)
+    # print(indexFirstColumn)
+    # print(indexLastColumn)
 
     # check whether indexFirstColumn[0] and indexLastColumn[0] are in the same line
     k0 = (indexLastColumn[0] - indexFirstColumn[0]) / 190.0
@@ -77,11 +77,8 @@ def processImg(rawImg):
 
     im = Image.fromarray(numpy.uint8(imArray * 255))
     # result = tesserocr.image_to_text(im)
-    imgs = [Image.fromarray(numpy.uint8(imArray[:,0:50] * 255))]
-    imgs.append(Image.fromarray(numpy.uint8(imArray[:,51:96] * 255)))
-    imgs.append(Image.fromarray(numpy.uint8(imArray[:,97:146] * 255)))
-    imgs.append(Image.fromarray(numpy.uint8(imArray[:,147:190] * 255)))
+    imgs = [Image.fromarray(numpy.uint8(imArray[:, 0:50] * 255))]
+    imgs.append(Image.fromarray(numpy.uint8(imArray[:, 51:96] * 255)))
+    imgs.append(Image.fromarray(numpy.uint8(imArray[:, 97:146] * 255)))
+    imgs.append(Image.fromarray(numpy.uint8(imArray[:, 147:190] * 255)))
     return imgs
-
-
-
