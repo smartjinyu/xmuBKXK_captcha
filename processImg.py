@@ -6,6 +6,11 @@ import numpy
 
 
 def processImg(rawImg):
+    '''
+    process the raw image, eliminate the interfering line, separate into four images, with only one digit in eah
+    :param rawImg: the captcha to process
+    :return: list of four images, with only one digit in each imageg
+    '''
     BlackWhiteImage = rawImg.convert('1')
     imArray = numpy.array(BlackWhiteImage)[:, 4:195]  # discard the start and end columns
     # print(imArray.shape)
