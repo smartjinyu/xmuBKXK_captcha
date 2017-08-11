@@ -73,7 +73,6 @@ def login():
         return False
 
 
-
 def createDir():
     '''
     create directory to save training set
@@ -104,7 +103,8 @@ def saveNegative(img, captcha):
     :param captcha: result given by Tesseract
     :return:
     '''
-    filename = savingDir + '/failures/' + captcha.replace(' ', 'o') + '.jpg'
+
+    filename = savingDir + '/failures/' + captcha.replace(' ', 'o') + '_' + str(uuid.uuid1()) + '.jpg'
     img.save(filename, 'JPEG')
 
 
