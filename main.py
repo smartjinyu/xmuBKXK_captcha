@@ -10,7 +10,7 @@ import os
 
 __author__ = 'smartjinyu'
 
-savingDir = './trainData'
+savingDir = '../trainData'
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     for i in range(1, 60001):
         if login():
             count = count + 1
-        print('{} / {} = {}%'.format(count, i, count / i))
+        print('{} / {} = {}'.format(count, i, count / i))
     print(count)
 
 
@@ -59,11 +59,11 @@ def login():
         # print(html.text)
         if u'进入学生选课系统' in html.text:
             # print('Login successfully!')
-            savePositive(imgs, captcha)
+            savePositive(imgs, rawImage, captcha)
             return True
         elif u'用户名或密码错误' in html.text:
             # print('Wrong id or password!')
-            savePositive(imgs, captcha)
+            savePositive(imgs, rawImage, captcha)
             return True
         else:
             # print('Wrong captcha!')
@@ -84,6 +84,7 @@ def createDir():
     for i in range(0, 10):
         os.makedirs(savingDir + '/' + str(i))
     os.makedirs(savingDir + '/failures')
+    os.makedirs(savingDir + '/rawData')
 
 
 def savePositive(imgs, rawImg, captcha):
@@ -94,10 +95,13 @@ def savePositive(imgs, rawImg, captcha):
     :param captcha: result str of the captcha
     :return:
     """
+    UUID = uuid.uuid1()
     for i in range(0, 4):
         img = imgs[i]
-        filename = savingDir + '/' + captcha[i] + '/' + str(uuid.uuid1()) + '.jpg'
+        filename = savingDir + '/' + captcha[i] + '/' + str(UUID) + '.jpg'
         img.save(filename, 'JPEG')
+    rawFilename = savingDir + '/rawData/' + captcha + '_' + str(UUID) + '.jpg'
+    rawImg.save(rawFilename, 'JPEG')
 
 
 def saveNegative(img, captcha):
@@ -107,7 +111,6 @@ def saveNegative(img, captcha):
     :param captcha: result given by Tesseract
     :return:
     """
-
 
     filename = savingDir + '/failures/' + captcha.replace(' ', 'o') + '_' + str(uuid.uuid1()) + '.jpg'
     img.save(filename, 'JPEG')
