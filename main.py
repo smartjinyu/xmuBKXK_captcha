@@ -18,7 +18,7 @@ def main():
         createDir()
 
     count = 0
-    for i in range(1, 10001):
+    for i in range(1, 60001):
         if login():
             count = count + 1
         print('{} / {} = {}%'.format(count, i, count / i))
@@ -27,8 +27,10 @@ def main():
 
 def login():
     # try to login to http://bkxk.xmu.edu.cn/xsxk
-    id = 12345  # raw_input('Please input your student id:')
-    pwd = 'testtest'  # getpass.getpass('Please input the corresponding password:')
+    # id = 12345  # raw_input('Please input your student id:')
+    # pwd = 'testtest'  # getpass.getpass('Please input the corresponding password:')
+    id = str(uuid.uuid1()).replace('-', '')
+    pwd = str(uuid.uuid1()).replace('-', '')
     loginUrl = 'http://bkxk.xmu.edu.cn/xsxk/login.html'
     # localInfoUrl = 'http://bkxk.xmu.edu.cn/xsxk/localInfo.html'
     try:
@@ -54,6 +56,7 @@ def login():
             'checkCode': captcha,
         }
         html = session.post(loginUrl, loginData)
+        # print(html.text)
         if u'进入学生选课系统' in html.text:
             # print('Login successfully!')
             savePositive(imgs, captcha)
@@ -74,22 +77,23 @@ def login():
 
 
 def createDir():
-    '''
+    """
     create directory to save training set
     :return:
-    '''
+    """
     for i in range(0, 10):
         os.makedirs(savingDir + '/' + str(i))
     os.makedirs(savingDir + '/failures')
 
 
-def savePositive(imgs, captcha):
-    '''
+def savePositive(imgs, rawImg, captcha):
+    """
     save right captcha recognized by Tesseract
-    :param imgs: a list of four images, with only one digit in each img
-    :param captcha: str of captcha
+    :param imgs: a list of four processed images, with only one digit in each img
+    :param rawImg: raw image without processing
+    :param captcha: result str of the captcha
     :return:
-    '''
+    """
     for i in range(0, 4):
         img = imgs[i]
         filename = savingDir + '/' + captcha[i] + '/' + str(uuid.uuid1()) + '.jpg'
@@ -97,12 +101,13 @@ def savePositive(imgs, captcha):
 
 
 def saveNegative(img, captcha):
-    '''
+    """
     save wrong captcha recognized by Tesseract
     :param img: raw image of captcha
     :param captcha: result given by Tesseract
     :return:
-    '''
+    """
+
 
     filename = savingDir + '/failures/' + captcha.replace(' ', 'o') + '_' + str(uuid.uuid1()) + '.jpg'
     img.save(filename, 'JPEG')
