@@ -72,7 +72,7 @@ def login():
             return False
     except KeyboardInterrupt:
         exit(-1)
-    except:
+    #except:
         print("Something went wrong in this iteration")
         return False
 
@@ -86,6 +86,7 @@ def createDir():
         os.makedirs(savingDir + '/' + str(i))
     os.makedirs(savingDir + '/failures')
     os.makedirs(savingDir + '/rawData')
+    os.makedirs(savingDir + '/processed')
 
 
 def savePositive(imgs, rawImg, captcha):
