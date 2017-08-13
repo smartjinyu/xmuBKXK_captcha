@@ -40,10 +40,11 @@ def login():
         imgs = processImg.processImg(rawImage)
         resultCaptcha = []
         with PyTessBaseAPI() as api:
-            for img in imgs:
+            for i in range(0, 4):
                 # img.show()
+                img = imgs[i]
                 api.SetImage(img)
-                api.SetVariable("tessedit_char_whitelist", "023456789")  # seems that no 1 in captcha
+                api.SetVariable("tessedit_char_whitelist", "0123456789")  # seems that no 1 in captcha
                 api.SetPageSegMode(10)
                 resultCaptcha.append(api.GetUTF8Text())
 
@@ -90,7 +91,7 @@ def createDir():
 def savePositive(imgs, rawImg, captcha):
     """
     save right captcha recognized by Tesseract
-    :param imgs: a list of four processed images, with only one digit in each img
+    :param imgs: a list of five processed images,first four with only one digit in each img, last is the full processed image
     :param rawImg: raw image without processing
     :param captcha: result str of the captcha
     :return:
@@ -102,6 +103,8 @@ def savePositive(imgs, rawImg, captcha):
         img.save(filename, 'JPEG')
     rawFilename = savingDir + '/rawData/' + captcha + '_' + str(UUID) + '.jpg'
     rawImg.save(rawFilename, 'JPEG')
+    processedFilename = savingDir + '/processed/' + captcha + '_' + str(UUID) + '.jpg'
+    imgs[4].save(processedFilename, 'JPEG')
 
 
 def saveNegative(img, captcha):

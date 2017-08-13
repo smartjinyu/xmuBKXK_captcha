@@ -1,15 +1,32 @@
 #!/usr/bin/python
 
-__author__ = 'smartjinyu'
 from PIL import Image
 import numpy
+import os
+
+__author__ = 'smartjinyu'
+
+
+def convertRawImg():
+    inputPath = '../trainData/rawData'
+    outputPath = '../trainData/processed'
+    if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+    fileList = os.listdir(inputPath)
+    for filename in fileList:
+        rawImg = Image.open(inputPath + '/' + filename)
+        print('Processing ' + inputPath + '/' + filename)
+        processed = processImg(rawImg)[4]
+        outputFilename = outputPath + '/' + filename
+        processed.save(outputFilename, 'JPEG')
+    return
 
 
 def processImg(rawImg):
     """
     process the raw image, eliminate the interfering line, separate into four images, with only one digit in eah
     :param rawImg: the captcha to process
-    :return: list of four images, with only one digit in each imageg
+    :return: list of five images,first four with only one digit in each image, and the last one is the full processed image
     """
     BlackWhiteImage = rawImg.convert('1')
     imArray = numpy.array(BlackWhiteImage)[:, 4:195]  # discard the start and end columns
@@ -80,10 +97,14 @@ def processImg(rawImg):
             for j in range(lower, upper):
                 imArray[j, x] = True
 
-    im = Image.fromarray(numpy.uint8(imArray * 255))
     # result = tesserocr.image_to_text(im)
     imgs = [Image.fromarray(numpy.uint8(imArray[:, 0:50] * 255))]
     imgs.append(Image.fromarray(numpy.uint8(imArray[:, 51:96] * 255)))
     imgs.append(Image.fromarray(numpy.uint8(imArray[:, 97:146] * 255)))
     imgs.append(Image.fromarray(numpy.uint8(imArray[:, 147:190] * 255)))
+    imgs.append(Image.fromarray(numpy.uint8(imArray * 255)))
     return imgs
+
+
+if __name__ == '__main__':
+    convertRawImg()
