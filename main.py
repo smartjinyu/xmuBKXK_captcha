@@ -68,11 +68,11 @@ def login():
             return True
         else:
             # print('Wrong captcha!')
-            saveNegative(rawImage, captcha)
+            # saveNegative(rawImage, captcha)
             return False
     except KeyboardInterrupt:
         exit(-1)
-    #except:
+    except:
         print("Something went wrong in this iteration")
         return False
 
