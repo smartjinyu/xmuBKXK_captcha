@@ -74,10 +74,11 @@ import threading
 
 import numpy as np
 import tensorflow as tf
+from PIL import Image
 
-tf.app.flags.DEFINE_string('train_directory', './trainData/',
+tf.app.flags.DEFINE_string('train_directory', './trainData',
                            'Training data directory')
-tf.app.flags.DEFINE_string('validation_directory', './valData/',
+tf.app.flags.DEFINE_string('validation_directory', './valData',
                            'Validation data directory')
 tf.app.flags.DEFINE_string('output_directory', './TFrecord/',
                            'Output data directory')
@@ -145,34 +146,6 @@ def _convert_to_example(filename, image_buffer, label, text, height, width):
     return example
 
 
-class ImageCoder(object):
-    """Helper class that provides TensorFlow image coding utilities."""
-
-    def __init__(self):
-        # Create a single Session to run all image coding calls.
-        self._sess = tf.Session()
-
-        # Initializes function that converts PNG to JPEG data.
-        self._png_data = tf.placeholder(dtype=tf.string)
-        image = tf.image.decode_png(self._png_data, channels=3)
-        self._png_to_jpeg = tf.image.encode_jpeg(image, format='rgb', quality=100)
-
-        # Initializes function that decodes RGB JPEG data.
-        self._decode_jpeg_data = tf.placeholder(dtype=tf.string)
-        self._decode_jpeg = tf.image.decode_jpeg(self._decode_jpeg_data, channels=3)
-
-    def png_to_jpeg(self, image_data):
-        return self._sess.run(self._png_to_jpeg,
-                              feed_dict={self._png_data: image_data})
-
-    def decode_jpeg(self, image_data):
-        image = self._sess.run(self._decode_jpeg,
-                               feed_dict={self._decode_jpeg_data: image_data})
-        assert len(image.shape) == 3
-        assert image.shape[2] == 3
-        return image
-
-
 def _is_png(filename):
     """Determine if a file contains a PNG format image.
 
@@ -185,7 +158,7 @@ def _is_png(filename):
     return '.png' in filename
 
 
-def _process_image(filename, coder):
+def _process_image(filename):
     """Process a single image file.
 
     Args:
@@ -196,28 +169,19 @@ def _process_image(filename, coder):
       height: integer, image height in pixels.
       width: integer, image width in pixels.
     """
-    # Read the image file.
-    with tf.gfile.FastGFile(filename, 'rb') as f:
-        image_data = f.read()
 
-    # Convert any PNG to JPEG's for consistency.
-    if _is_png(filename):
-        print('Converting PNG to JPEG for %s' % filename)
-        image_data = coder.png_to_jpeg(image_data)
 
-    # Decode the RGB JPEG.
-    image = coder.decode_jpeg(image_data)
+    image = Image.open(filename)
+    image = np.asarray(image, np.uint8)
+    image_data = image.tobytes()
 
-    # Check that image converted to RGB
-    assert len(image.shape) == 3
     height = image.shape[0]
     width = image.shape[1]
-    assert image.shape[2] == 3
 
     return image_data, height, width
 
 
-def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
+def _process_image_files_batch(thread_index, ranges, name, filenames,
                                texts, labels, num_shards):
     """Processes and saves list of images as TFRecord in 1 thread.
 
@@ -259,13 +223,16 @@ def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
             label = labels[i]
             text = texts[i]
 
+            image_buffer, height, width = _process_image(filename)
+
+            '''
             try:
-                image_buffer, height, width = _process_image(filename, coder)
+                image_buffer, height, width = _process_image(filename)
             except Exception as e:
                 print(e)
                 print('SKIPPED: Unexpected eror while decoding %s.' % filename)
                 continue
-
+            '''
             example = _convert_to_example(filename, image_buffer, label,
                                           text, height, width)
             writer.write(example.SerializeToString())
@@ -314,11 +281,10 @@ def _process_image_files(name, filenames, texts, labels, num_shards):
     coord = tf.train.Coordinator()
 
     # Create a generic TensorFlow-based utility for converting all image codings.
-    coder = ImageCoder()
 
     threads = []
     for thread_index in range(len(ranges)):
-        args = (coder, thread_index, ranges, name, filenames,
+        args = (thread_index, ranges, name, filenames,
                 texts, labels, num_shards)
         t = threading.Thread(target=_process_image_files_batch, args=args)
         t.start()
