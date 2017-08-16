@@ -3,31 +3,49 @@
 from PIL import Image
 import numpy
 import os
+import random
 
 __author__ = 'smartjinyu'
 
 
 def convertRawImg():
-    inputPath = '../trainData/rawData'
-    outputPath = '../trainData/processed'
-    if not os.path.exists(outputPath):
-        os.makedirs(outputPath)
+    inputPath = './trainData/rawData'
+    outputPath_train = './trainData'
+    outputPath_validate = './valData'
+
+    if not os.path.exists(outputPath_train + '/processed'):
+        os.makedirs(outputPath_train + '/processed')
+    if not os.path.exists(outputPath_validate + '/processed'):
+        os.makedirs(outputPath_validate + '/processed')
+
+    for i in range(0, 10):
+        if not os.path.exists(outputPath_train + '/' + str(i)):
+            os.makedirs(outputPath_train + '/' + str(i))
+        if not os.path.exists(outputPath_validate + '/' + str(i)):
+            os.makedirs(outputPath_validate + '/' + str(i))
+
     fileList = os.listdir(inputPath)
-    '''
+    random.shuffle(fileList)
+    length = len(fileList)
+    j = 0
     for filename in fileList:
+        # filename = '0008_b823fc04-81b0-11e7-b502-000c29187544.jpg'
         rawImg = Image.open(inputPath + '/' + filename)
         print('Processing ' + inputPath + '/' + filename)
-        processed = processImg(rawImg)[4]
-        outputFilename = outputPath + '/' + filename
+        imgs = processImg(rawImg)
+        processed = imgs[4]
+        # processed.show()
+        # input("Input to continue...")
+        if j < round(length * 0.8):
+            outputPath = outputPath_train
+        else:
+            outputPath = outputPath_validate
+        outputFilename = outputPath + '/processed/' + filename
         processed.save(outputFilename, 'JPEG')
-        '''
-    rawImg = Image.open(inputPath + '/' + fileList[3])
-    imgs = processImg(rawImg)
-    imgs[0].show()
-    imgs[1].show()
-    imgs[2].show()
-    imgs[3].show()
-
+        names = filename.split('_')
+        for i in range(0, 4):
+            imgs[i].save(outputPath + '/' + names[0][i] + '/' + names[1], 'JPEG')
+        j = j + 1
     return
 
 
@@ -51,7 +69,7 @@ def processImg(rawImg):
             if len(indexFirstColumn) == 2:
                 break
             else:
-                i = i + 4
+                i = i + 5
         i = i + 1
     i = 0
     while i < imArray.shape[0]:
@@ -60,12 +78,12 @@ def processImg(rawImg):
             if len(indexLastColumn) == 2:
                 break
             else:
-                i = i + 4
+                i = i + 5
         i = i + 1
 
     # avoid two lines intersect at the start or the end
     if len(indexFirstColumn) == 1:
-        indexFirstColumn.append(indexFirstColumn[0] + 1)
+        indexFirstColumn.append(indexFirstColumn[0] + 2)
     if len(indexLastColumn) == 1:
         indexLastColumn.append(indexLastColumn[0] + 2)
 
@@ -79,7 +97,9 @@ def processImg(rawImg):
         y = round(k0 * x + indexFirstColumn[0])
         if imArray[y, x] == 0:
             count = count + 1
-    if count < 17:  # typically if they are in the same line, count >= 18
+
+    # print(count)
+    if count < 14:  # typically if they are in the same line, count >= 18
         temp = indexLastColumn[1]
         indexLastColumn[1] = indexLastColumn[0]
         indexLastColumn[0] = temp
@@ -87,22 +107,24 @@ def processImg(rawImg):
     k1 = (indexLastColumn[1] - indexFirstColumn[1]) / 188.0
 
     # eliminate interfering lines
-    lowerBound = 2.5
-    upperBound = 3.6
+    lowerBound = 2.7
+    upperBound = 3.9
     # points in [y-lowerBond,y+upperBound] will be set to True (if no digit pixel)
     for x in range(0, 188):
         y0 = k0 * x + indexFirstColumn[0]
         lower = max(round(y0 - lowerBound), 0)
         upper = min(round(y0 + upperBound), 99)  # avoid array index out of bound
+        # imArray[round(y0), x] = True
         if (imArray[lower, x] != 0) and (imArray[upper, x] != 0):
-            for j in range(lower, upper):
+            for j in range(lower, upper + 1):
                 imArray[j, x] = True
 
         y1 = k1 * x + indexFirstColumn[1]
         lower = max(round(y1 - lowerBound), 0)
         upper = min(round(y1 + upperBound), 99)
+        # imArray[round(y1), x] = True
         if (imArray[lower, x] != 0) and (imArray[upper, x] != 0):
-            for j in range(lower, upper):
+            for j in range(lower, upper + 1):
                 imArray[j, x] = True
 
     # result = tesserocr.image_to_text(im)

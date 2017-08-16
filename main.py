@@ -101,11 +101,11 @@ def savePositive(imgs, rawImg, captcha):
     for i in range(0, 4):
         img = imgs[i]
         filename = savingDir + '/' + captcha[i] + '/' + str(UUID) + '.jpg'
-        img.save(filename, 'JPEG')
+        #img.save(filename, 'JPEG')
     rawFilename = savingDir + '/rawData/' + captcha + '_' + str(UUID) + '.jpg'
     rawImg.save(rawFilename, 'JPEG')
-    processedFilename = savingDir + '/processed/' + captcha + '_' + str(UUID) + '.jpg'
-    imgs[4].save(processedFilename, 'JPEG')
+    #processedFilename = savingDir + '/processed/' + captcha + '_' + str(UUID) + '.jpg'
+    #imgs[4].save(processedFilename, 'JPEG')
 
 
 def saveNegative(img, captcha):
