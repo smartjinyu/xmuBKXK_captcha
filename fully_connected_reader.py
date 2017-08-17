@@ -36,13 +36,15 @@ import time
 import tensorflow as tf
 
 import mnist
+from PIL import Image
+import numpy as np
 
 # Basic model parameters as external flags.
 FLAGS = None
 
 # Constants used for dealing with the files, matches convert_to_records.
-TRAIN_FILE = ['train-00000-of-00002', 'train-00000-of-00002']
-VALIDATION_FILE = ['validation-00000-of-00002', 'validation-00001-of-00002']
+TRAIN_FILE = []
+VALIDATION_FILE = []
 
 
 def read_and_decode(filename_queue):
@@ -102,7 +104,6 @@ def inputs(train, batch_size, num_epochs):
     else:
         for name in VALIDATION_FILE:
             filename.append(os.path.join(FLAGS.train_dir, name))
-
     with tf.name_scope('input'):
         filename_queue = tf.train.string_input_producer(
             filename, num_epochs=num_epochs)
@@ -118,9 +119,18 @@ def inputs(train, batch_size, num_epochs):
             [image, label], batch_size=batch_size, num_threads=2,
             capacity=1000 + 3 * batch_size,
             # Ensures a minimum amount of shuffling of examples.
-            min_after_dequeue=1000)
+            min_after_dequeue=1000, allow_smaller_final_batch=False)
 
         return images, sparse_labels
+
+
+def read_single_image(filename):
+    image = Image.open(filename)
+    image_array = np.asarray(image,np.uint8)
+    image = tf.decode_raw(image_array.tobytes(), tf.uint8)
+    image.set_shape([mnist.IMAGE_PIXELS])
+    image = tf.cast(image, tf.float32) * (1. / 255) - 0.5
+    return image
 
 
 def run_training():
@@ -146,7 +156,6 @@ def run_training():
         # The op for initializing the variables.
         init_op = tf.group(tf.global_variables_initializer(),
                            tf.local_variables_initializer())
-
         # Create a session for running operations in the Graph.
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
@@ -187,6 +196,7 @@ def run_training():
             coord.request_stop()
 
         # Wait for threads to finish.
+
         coord.join(threads)
         sess.close()
 
@@ -233,5 +243,9 @@ if __name__ == '__main__':
         default='./TFrecord',
         help='Directory with the training data.'
     )
+    for i in range(0, 1024):
+        TRAIN_FILE.append('train-{:05d}-of-01024'.format(i))
+    for i in range(0, 128):
+        VALIDATION_FILE.append('validation-{:05d}-of-01024'.format(i))
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
