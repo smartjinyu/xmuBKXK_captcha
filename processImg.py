@@ -32,8 +32,7 @@ def convertRawImg():
         # filename = '0008_b823fc04-81b0-11e7-b502-000c29187544.jpg'
         rawImg = Image.open(inputPath + '/' + filename)
         print('Processing ' + inputPath + '/' + filename)
-        imgs = processImg(rawImg)
-        processed = imgs[4]
+        imgs, processed = processImg(rawImg)
         # processed.show()
         # input("Input to continue...")
         if j < round(length * 0.8):
@@ -53,7 +52,7 @@ def processImg(rawImg):
     """
     process the raw image, eliminate the interfering line, separate into four images, with only one digit in eah
     :param rawImg: the captcha to process
-    :return: list of five images,first four with only one digit in each image, and the last one is the full processed image
+    :return: list of four images,first four with only one digit in each image; and the full processed image
     """
     BlackWhiteImage = rawImg.convert('1')
     imArray = numpy.array(BlackWhiteImage)[:, 5:193]  # discard the start and end columns
@@ -132,8 +131,8 @@ def processImg(rawImg):
     imgs.append(Image.fromarray(numpy.uint8(imArray[:, 47:94] * 255)))
     imgs.append(Image.fromarray(numpy.uint8(imArray[:, 94:141] * 255)))
     imgs.append(Image.fromarray(numpy.uint8(imArray[:, 141:188] * 255)))
-    imgs.append(Image.fromarray(numpy.uint8(imArray * 255)))
-    return imgs
+    processed = Image.fromarray(numpy.uint8(imArray * 255))
+    return imgs, processed
 
 
 if __name__ == '__main__':

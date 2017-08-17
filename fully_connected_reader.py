@@ -123,7 +123,6 @@ def inputs(train, batch_size, num_epochs):
             capacity=1000 + 3 * batch_size,
             # Ensures a minimum amount of shuffling of examples.
             min_after_dequeue=1000, allow_smaller_final_batch=False)
-
         return images, sparse_labels
 
 
@@ -145,17 +144,22 @@ def run_training():
     my_image = read_single_image('D:\\xmuBKXK_captcha\\valData\\8\\00ce70de-8023-11e7-80f3-000c29187544.jpg')
 
     # simple model
-    w = tf.get_variable("w1", [Height * Width, 10])
+    w = tf.get_variable('w1', [Height * Width, 10])
     y_pred = tf.matmul(images, w)
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=y_pred)
     my_y = tf.matmul([my_image], w)
 
+    #correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(labels, 1))
+    #accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    predict = tf.argmax(y_pred, 1)
     # for monitoring
     loss_mean = tf.reduce_mean(loss)
     train_op = tf.train.AdamOptimizer().minimize(loss)
 
     init_op = tf.group(tf.global_variables_initializer(),
                        tf.local_variables_initializer())
+
+    saver = tf.train.Saver()
 
     # Create a session for running operations in the Graph.
     config = tf.ConfigProto()
@@ -179,9 +183,9 @@ def run_training():
             duration = time.time() - start_time
             # Print an overview fairly often.
             if step % 100 == 0:
-                print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value,
+                print('Step %d: loss = %.2f   (%.3f sec)' % (step, loss_value,
                                                            duration))
-                print(sess.run(my_y))
+                print(sess.run(predict))
             step += 1
     except tf.errors.OutOfRangeError:
         print('Done training for %d epochs, %d steps.' % (FLAGS.num_epochs, step))
@@ -192,73 +196,10 @@ def run_training():
     # Wait for threads to finish.
 
     coord.join(threads)
+    save_path = saver.save(sess, './model.ckpt')
+    print('Model saved in file: ', save_path)
+
     sess.close()
-
-    '''
-    # Tell TensorFlow that the model will be built into the default Graph.
-    with tf.Graph().as_default():
-        # Input images and labels.
-        images, labels = inputs(train=True, batch_size=FLAGS.batch_size,
-                                num_epochs=FLAGS.num_epochs)
-
-        # Build a Graph that computes predictions from the inference model.
-        logits = mnist.inference(images,
-                                 FLAGS.hidden1,
-                                 FLAGS.hidden2)
-
-        # Add to the Graph the loss calculation.
-        loss = mnist.loss(logits, labels)
-
-        # Add to the Graph operations that train the model.
-        train_op = mnist.training(loss, FLAGS.learning_rate)
-
-        # The op for initializing the variables.
-        init_op = tf.group(tf.global_variables_initializer(),
-                           tf.local_variables_initializer())
-        # Create a session for running operations in the Graph.
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        sess = tf.Session(config=config)
-
-        # Initialize the variables (the trained variables and the
-        # epoch counter).
-        sess.run(init_op)
-
-        # Start input enqueue threads.
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
-        try:
-            step = 0
-            while not coord.should_stop():
-                start_time = time.time()
-
-                # Run one step of the model.  The return values are
-                # the activations from the `train_op` (which is
-                # discarded) and the `loss` op.  To inspect the values
-                # of your ops or variables, you may include them in
-                # the list passed to sess.run() and the value tensors
-                # will be returned in the tuple from the call.
-                _, loss_value = sess.run([train_op, loss])
-
-                duration = time.time() - start_time
-
-                # Print an overview fairly often.
-                if step % 100 == 0:
-                    print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value,
-                                                               duration))
-                step += 1
-        except tf.errors.OutOfRangeError:
-            print('Done training for %d epochs, %d steps.' % (FLAGS.num_epochs, step))
-        finally:
-            # When done, ask the threads to stop.
-            coord.request_stop()
-
-        # Wait for threads to finish.
-
-        coord.join(threads)
-        sess.close()
-    '''
 
 
 def main(_):
