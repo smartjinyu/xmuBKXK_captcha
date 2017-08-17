@@ -144,7 +144,8 @@ def run_training():
     my_image = read_single_image('D:\\xmuBKXK_captcha\\valData\\8\\00ce70de-8023-11e7-80f3-000c29187544.jpg')
 
     # simple model
-    w = tf.get_variable('w1', [Height * Width, 10])
+    # w = tf.get_variable(name='w1', shape=[Height * Width, 10])
+    w = tf.Variable(tf.zeros([Height*Width, 10]), name='w1')
     y_pred = tf.matmul(images, w)
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=y_pred)
     my_y = tf.matmul([my_image], w)
@@ -244,7 +245,7 @@ if __name__ == '__main__':
         default='./TFrecord',
         help='Directory with the training data.'
     )
-    for i in range(0, 1024):
+    for i in range(0, 104):
         TRAIN_FILE.append('train-{:05d}-of-01024'.format(i))
     for i in range(0, 128):
         VALIDATION_FILE.append('validation-{:05d}-of-01024'.format(i))
