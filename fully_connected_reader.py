@@ -245,7 +245,7 @@ if __name__ == '__main__':
         default='./TFrecord',
         help='Directory with the training data.'
     )
-    for i in range(0, 104):
+    for i in range(0, 1024):
         TRAIN_FILE.append('train-{:05d}-of-01024'.format(i))
     for i in range(0, 128):
         VALIDATION_FILE.append('validation-{:05d}-of-01024'.format(i))
