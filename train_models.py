@@ -125,15 +125,6 @@ def inputs(train, batch_size, num_epochs):
         return images, sparse_labels
 
 
-def read_single_image(filename):
-    image = Image.open(filename)
-    image_array = np.asarray(image, np.uint8)
-    image = tf.decode_raw(image_array.tobytes(), tf.uint8)
-    image.set_shape([IMAGE_PIXELS])
-    image = tf.cast(image, tf.float32) * (1. / 255) - 0.5
-    return image
-
-
 def run_training():
     """Train for a number of steps."""
     images, labels = inputs(train=True, batch_size=FLAGS.batch_size,
@@ -141,14 +132,11 @@ def run_training():
     vimages, vlabels = inputs(train=False, batch_size=FLAGS.batch_size,
                               num_epochs=FLAGS.num_epochs)
 
-    my_image = read_single_image('D:\\xmuBKXK_captcha\\valData\\8\\00ce70de-8023-11e7-80f3-000c29187544.jpg')
 
     # simple model
-    # w = tf.get_variable(name='w1', shape=[Height * Width, 10])
     w = tf.Variable(tf.zeros([Height * Width, 10]), name='w1')
     y_pred = tf.matmul(images, w)
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=y_pred)
-    my_y = tf.matmul([my_image], w)
 
     y_vpred = tf.matmul(vimages, w)
     correct_prediction = tf.equal(tf.argmax(y_vpred, 1), tf.cast(vlabels, tf.int64))
