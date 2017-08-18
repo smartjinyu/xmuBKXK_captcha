@@ -26,8 +26,10 @@ You can use this project out of box, and get recognition results in only one com
 
 Just call
  
+ 
     Import ocrCaptcha
     reuslt = ocrRawCaptcha(Image)
+
 
 The parameter is an Image object of a single captcha, it will return a str object containing reconition results. Refer to `downloadCaptchas.py` about how to get captchas from [the website]. The following are a simple example:
 
@@ -41,33 +43,41 @@ In most  situations, the default model should suffice for use. I used more than 
 
 If you want to train the model yourself, please follow these steps:
 
-1. Download labeled data:
+#### 1. Download labeled data:
+
 
     Python ./downloadCaptchas.py
 
+
 Run `downloadCaptchas.py` to get labeled training examples from the website. The script will download captchas, remove the intefering line, split  characters, then use Tesseract to recognize them. In my test, Tesseract will give about 53.5% recognition rate for one captcha. After that, the script will try to login to the website using recognition results, and save the captcha with labels to disk if succeed.
 
-2. Split download captchas into single characters
+#### 2. Split download captchas into single characters
+
 
     Python ./processImg.py
+
 
 Run `processImg.py`, it will split downloaded results into images with single character. In default settings, the ratio of training set and validation set will be 4:1.
 
 Be cautious that a large amount of small files may run out of your disk easily.
 
-3. Convert labeled data into TFRecords
+#### 3. Convert labeled data into TFRecords
+
 
     Python ./build_tfrecords.py
+    
 
 Run `build_tfrecords.py`. It will convert labeled data from above steps into TFRecords files, which is the standard format for TensorFlow.
 
-4. Train and save TensorFlow model
+#### 4. Train and save TensorFlow model
+
 
     Python ./train_models.py
 
+
 Run `train_models.py`. This script will train a TensorFlow model using `softmax` method and save it to disk. The training time depends on your hardware and the size of your training set.
 
-5. Use it!
+#### 5. Use it!
 
 Congratulations! You have successfully trained your own model. Use it like the default model mentioned above. You can modify `downloadCaptchas.py` to estimate your new model's recognition rate.
 
