@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Converts image data to TFRecords file format with Example protos.
+"""
+This script converts processed captchas to standard TFRecords files
+You should run dowloadCaptchas.py and processImg.py beforehand.
+Reference: https://github.com/tensorflow/models/blob/master/inception/inception/data/build_image_data.py
+
+Below are original comments by Google
+Converts image data to TFRecords file format with Example protos.
 
 The image data set is expected to reside in JPEG files located in the
 following directory structure.
@@ -78,7 +84,6 @@ from PIL import Image
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 
 tf.app.flags.DEFINE_string('train_directory', './trainData',
                            'Training data directory')
@@ -173,7 +178,6 @@ def _process_image(filename):
       height: integer, image height in pixels.
       width: integer, image width in pixels.
     """
-
 
     image = Image.open(filename)
     image = np.asarray(image, np.uint8)
@@ -391,6 +395,8 @@ def main(unused_argv):
     assert not FLAGS.validation_shards % FLAGS.num_threads, (
         'Please make the FLAGS.num_threads commensurate with '
         'FLAGS.validation_shards')
+    if not os.path.exists(FLAGS.output_directory):
+        os.makedirs(FLAGS.output_directory)
     print('Saving results to %s' % FLAGS.output_directory)
 
     # Run it!

@@ -1,4 +1,9 @@
 #!/usr/bin/python
+"""
+This script is used to preprocess captchas. Typically, it is called by other scripts.
+Run it to convert download captchas to single characters (You need to run downloadCaptchas.py beforehand)
+"""
+
 
 from PIL import Image
 import numpy

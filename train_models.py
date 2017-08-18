@@ -13,16 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 
-"""Train and Eval the MNIST network.
-
-This version is like fully_connected_feed.py but uses data converted
-to a TFRecords file containing tf.train.Example protocol buffers.
-See:
-https://www.tensorflow.org/programmers_guide/reading_data#reading_from_files
-for context.
-
-YOU MUST run convert_to_records before running this (but you only need to
-run it once).
+"""
+This script is used to train and save TensorFlow models.
+You should run downloadCaptchas.py, processImg.py and build_tfrecords.py in order beforehand.
+Reference:
+https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/how_tos/reading_data/fully_connected_reader.py
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -154,7 +149,7 @@ def run_training():
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=y_pred)
     my_y = tf.matmul([my_image], w)
 
-    y_vpred = tf.matmul(vimages,w)
+    y_vpred = tf.matmul(vimages, w)
     correct_prediction = tf.equal(tf.argmax(y_vpred, 1), tf.cast(vlabels, tf.int64))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.double))
     # for monitoring
@@ -201,8 +196,12 @@ def run_training():
     # Wait for threads to finish.
 
     coord.join(threads)
-    # save_path = saver.save(sess, './model.ckpt')
-    # print('Model saved in file: ', save_path)
+    # save trained model
+    if not os.path.exists(FLAGS.models_dir):
+        os.makedirs(FLAGS.models_dir)
+    save_path = saver.save(sess, FLAGS.models_dir + '/model.ckpt')
+
+    print('Models saved in file: ', save_path)
 
     sess.close()
 
@@ -249,6 +248,13 @@ if __name__ == '__main__':
         default='./TFrecord',
         help='Directory with the training data.'
     )
+    parser.add_argument(
+        '--models_dir',
+        type=str,
+        default='./models',
+        help='Directory to save trained model.'
+    )
+
     for i in range(0, 1024):
         TRAIN_FILE.append('train-{:05d}-of-01024'.format(i))
     for i in range(0, 128):

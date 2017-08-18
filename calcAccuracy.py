@@ -1,4 +1,9 @@
 #!/usr/bin/python
+"""
+This script is used to calculate the accuracy of Tesseract
+You need to run downloadCaptchas.py first
+"""
+
 import os
 
 __author__ = 'smartjinyu'
@@ -21,4 +26,6 @@ def calcAccuracy():
 
 
 if __name__ == '__main__':
+    print('This script is used to calculate the accuracy of Tesseract')
+    print('You need to run downloadCaptchas.py first')
     calcAccuracy()
