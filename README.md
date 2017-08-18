@@ -85,9 +85,9 @@ Congratulations! You have successfully trained your own model. Use it like the d
 
 This is just a simple example to recognize captchas. If you have any advice or complaints, feel free to contact me. During development, I refer to some examples in TensorFlow repository.
 
-You can see [my blog] for other details.
+You can see [my blog] for more details.
 
-[my blog]:https://smartjinyu.com/
+[my blog]:https://smartjinyu.com/machine/learning/2017/08/18/xmu_bkxk_captcha.html
 
 ### License
 
