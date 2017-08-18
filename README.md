@@ -26,12 +26,12 @@ You can use this project out of box, and get recognition results in only one com
 
 Just call
  
- 
+
     Import ocrCaptcha
     reuslt = ocrRawCaptcha(Image)
 
 
-The parameter is an Image object of a single captcha, it will return a str object containing reconition results. Refer to `downloadCaptchas.py` about how to get captchas from [the website]. The following are a simple example:
+The parameter is an Image object of a single captcha, it will return a str object containing reconition results. Refer to `downloadCaptchas.py` about how to get captchas from [the website]. Here is a simple example:
 
 ![sample command](./examples/sample_cmd.png)
 
