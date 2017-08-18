@@ -30,7 +30,6 @@ import time
 
 import tensorflow as tf
 
-import mnist
 from PIL import Image
 import numpy as np
 import os
@@ -46,6 +45,8 @@ VALIDATION_FILE = []
 
 Height = 47
 Width = 100
+
+IMAGE_PIXELS = Height * Width
 
 
 def read_and_decode(filename_queue):
@@ -63,7 +64,7 @@ def read_and_decode(filename_queue):
     # length mnist.IMAGE_PIXELS) to a uint8 tensor with shape
     # [mnist.IMAGE_PIXELS].
     image = tf.decode_raw(features['image/encoded'], tf.uint8)
-    image.set_shape([mnist.IMAGE_PIXELS])
+    image.set_shape([IMAGE_PIXELS])
 
     # OPTIONAL: Could reshape into a 28x28 image and apply distortions
     # here.  Since we are not applying any distortions in this
@@ -128,7 +129,7 @@ def read_single_image(filename):
     image = Image.open(filename)
     image_array = np.asarray(image, np.uint8)
     image = tf.decode_raw(image_array.tobytes(), tf.uint8)
-    image.set_shape([mnist.IMAGE_PIXELS])
+    image.set_shape([IMAGE_PIXELS])
     image = tf.cast(image, tf.float32) * (1. / 255) - 0.5
     return image
 
@@ -174,8 +175,8 @@ def run_training():
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
+    step = 0
     try:
-        step = 0
         while not coord.should_stop():
             start_time = time.time()
             _, loss_value = sess.run([train_op, loss_mean])
