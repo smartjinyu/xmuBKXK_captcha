@@ -24,7 +24,7 @@ Model_dir = './models'
 # directory with saved models, should keep consistent with train_models.py
 
 def main():
-    image = Image.open('./trainData/rawData/0002_728cf82c-8009-11e7-80c1-000c29187544.jpg')
+    image = Image.open('./models/sample1.jpg')
     image.show()
 
     print(ocrRawCaptcha(image))
