@@ -7,6 +7,7 @@ import requests
 import io
 import uuid
 import os
+import ocrCaptcha
 
 __author__ = 'smartjinyu'
 
@@ -48,8 +49,8 @@ def login():
                 resultCaptcha.append(api.GetUTF8Text())
 
         captcha = ''.join(str(x) for x in resultCaptcha).replace('\n', '')
+        captcha = ocrCaptcha.ocrCaptchas(imgs)
         print(captcha)
-
         loginData = {
             'username': id,
             'password': pwd,
@@ -59,11 +60,11 @@ def login():
         # print(html.text)
         if u'进入学生选课系统' in html.text:
             # print('Login successfully!')
-            savePositive(imgs, processed, rawImage, captcha)
+            # savePositive(imgs, processed, rawImage, captcha)
             return True
         elif u'用户名或密码错误' in html.text:
             # print('Wrong id or password!')
-            savePositive(imgs, processed, rawImage, captcha)
+            # savePositive(imgs, processed, rawImage, captcha)
             return True
         else:
             # print('Wrong captcha!')

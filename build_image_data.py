@@ -75,6 +75,10 @@ import threading
 import numpy as np
 import tensorflow as tf
 from PIL import Image
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 tf.app.flags.DEFINE_string('train_directory', './trainData',
                            'Training data directory')

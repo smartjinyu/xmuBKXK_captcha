@@ -2,6 +2,9 @@ import tensorflow as tf
 import numpy as np
 import processImg
 from PIL import Image
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 Height = 47
 Width = 100
@@ -11,21 +14,22 @@ IMAGE_PIXELS = Height * Width
 def main():
     image = Image.open('./trainData/rawData/0002_728cf82c-8009-11e7-80c1-000c29187544.jpg')
     image.show()
-    print(ocrCaptcha(image))
+
+    print(ocrRawCaptcha(image))
 
 
-def ocrCaptcha(image):
+def ocrRawCaptcha(image):
     """
     recognize a captcha from http://bkxk.xmu.edu.cn/xsxk/login.html
     :param image: image data of the captcha
     :return: a string with four character
     """
     images, _ = processImg.processImg(image)
-    result = ocrSingleCaptcha(images)
+    result = ocrCaptchas(images)
     return result
 
 
-def ocrSingleCaptcha(images):
+def ocrCaptchas(images):
     """
     recognize the image after processing
     :param images: list of four images returned by processImg()
@@ -33,7 +37,6 @@ def ocrSingleCaptcha(images):
     """
     image_data = []
     tf.reset_default_graph()
-
     for img in images:
         image_array = np.asarray(img, np.uint8)
         image = tf.decode_raw(image_array.tobytes(), tf.uint8)

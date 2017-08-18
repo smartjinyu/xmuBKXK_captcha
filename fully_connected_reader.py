@@ -38,6 +38,9 @@ import tensorflow as tf
 import mnist
 from PIL import Image
 import numpy as np
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # Basic model parameters as external flags.
 FLAGS = None
@@ -135,24 +138,25 @@ def read_single_image(filename):
     return image
 
 
-
 def run_training():
     """Train for a number of steps."""
     images, labels = inputs(train=True, batch_size=FLAGS.batch_size,
                             num_epochs=FLAGS.num_epochs)
+    vimages, vlabels = inputs(train=False, batch_size=FLAGS.batch_size,
+                              num_epochs=FLAGS.num_epochs)
 
     my_image = read_single_image('D:\\xmuBKXK_captcha\\valData\\8\\00ce70de-8023-11e7-80f3-000c29187544.jpg')
 
     # simple model
     # w = tf.get_variable(name='w1', shape=[Height * Width, 10])
-    w = tf.Variable(tf.zeros([Height*Width, 10]), name='w1')
+    w = tf.Variable(tf.zeros([Height * Width, 10]), name='w1')
     y_pred = tf.matmul(images, w)
     loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=y_pred)
     my_y = tf.matmul([my_image], w)
 
-    #correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(labels, 1))
-    #accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    predict = tf.argmax(y_pred, 1)
+    y_vpred = tf.matmul(vimages,w)
+    correct_prediction = tf.equal(tf.argmax(y_vpred, 1), tf.cast(vlabels, tf.int64))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.double))
     # for monitoring
     loss_mean = tf.reduce_mean(loss)
     train_op = tf.train.AdamOptimizer().minimize(loss)
@@ -184,9 +188,9 @@ def run_training():
             duration = time.time() - start_time
             # Print an overview fairly often.
             if step % 100 == 0:
-                print('Step %d: loss = %.2f   (%.3f sec)' % (step, loss_value,
-                                                           duration))
-                print(sess.run(predict))
+                print('Step %d: loss = %.2f  (%.3f sec)' % (step, loss_value,
+                                                            duration))
+                print('Validation accuracy = %.6f' % sess.run(accuracy))
             step += 1
     except tf.errors.OutOfRangeError:
         print('Done training for %d epochs, %d steps.' % (FLAGS.num_epochs, step))
@@ -197,8 +201,8 @@ def run_training():
     # Wait for threads to finish.
 
     coord.join(threads)
-    save_path = saver.save(sess, './model.ckpt')
-    print('Model saved in file: ', save_path)
+    # save_path = saver.save(sess, './model.ckpt')
+    # print('Model saved in file: ', save_path)
 
     sess.close()
 
@@ -248,6 +252,6 @@ if __name__ == '__main__':
     for i in range(0, 1024):
         TRAIN_FILE.append('train-{:05d}-of-01024'.format(i))
     for i in range(0, 128):
-        VALIDATION_FILE.append('validation-{:05d}-of-01024'.format(i))
+        VALIDATION_FILE.append('validation-{:05d}-of-00128'.format(i))
     FLAGS, unparsed = parser.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
